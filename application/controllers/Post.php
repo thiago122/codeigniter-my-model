@@ -19,8 +19,23 @@ class Post extends CI_Controller {
 		foreach ($posts as $post) {
 			echo ' <br> ' . $post->id_post . ' - ' . $post->title . ' - ' . $post->nm_author;
 		}
+
+		// $this->ModelPost->attach('categories', 2, [1,2,3]);
+		 
+		echo '<hr>';
+
+		$categories = $this->ModelPost->getMany('categories', 2);
+		
+		foreach ($categories as $category) {
+			echo ' <br> ' . $category->id_category . ' - ' . $category->nm_category;
+		}
 		
 	}
+
+	public function saveCategory(){
+
+	}
+
 
 	public function store(){
 

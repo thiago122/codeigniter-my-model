@@ -9,6 +9,7 @@ class ModelPost extends MY_model {
 		$this->primaryKey 	= 'id_post';
 
 		$this->belongs_to['author'] = ['ModelAuthor','author_id'];
+		$this->belongs_to_many['categories'] = ['ModelCategory', 'posts_categories', 'post_id', 'category_id'];
 	}
 
 

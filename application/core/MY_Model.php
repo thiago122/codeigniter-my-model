@@ -240,7 +240,7 @@ class MY_Model extends CI_Model
 
     public function getMany($relationName, $primaryKey)
     {
-        $relationsData = $this->RepositoryUsuario->belongs_to_many[$relationName];
+        $relationsData = $this->belongs_to_many[$relationName];
 
         if (empty($relationsData)) {
             return [];
@@ -256,9 +256,9 @@ class MY_Model extends CI_Model
         $this->load->model($model);
 
         $tableLeft = $this->{$modelName}->table;
-        $idLeft = $this->{$modelName}->id;
+        $idLeft = $this->{$modelName}->primaryKey;
 
-        $this->db->where($pivot.'.'.$fk, $id);
+        $this->db->where($pivot.'.'.$fk, $primaryKey);
         $this->db->join($pivot, $pivot.'.'.$pivotLeftFk.' = '.$tableLeft.'.'.$idLeft);
 
         return $this->db->get($tableLeft)->result();
@@ -272,7 +272,7 @@ class MY_Model extends CI_Model
             $pivotLeftFkValue[] = $temp;
         }
 
-        $relationsData = $this->RepositoryUsuario->belongs_to_many[$relationName];
+        $relationsData = $this->belongs_to_many[$relationName];
 
         if (empty($relationsData)) {
             return false;
