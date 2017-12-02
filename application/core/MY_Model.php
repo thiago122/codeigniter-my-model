@@ -42,10 +42,23 @@ class MY_Model extends CI_Model
         return $this->db->get($this->table)->result();
     }
 
-    public function find($primaryKey = null)
+    public function find($primaryKeys = null)
     {
-        $result = $this->db->where($this->table.'.'.$this->primaryKey,  $primaryKey)
-            ->get($this->table)->row();
+
+        if(!is_array($primaryKeys)){
+            $temp = $primaryKeys;
+            $primaryKeys = [];
+            $primaryKeys[] = $temp;
+        }
+
+        $this->db->where_in($this->table.'.'.$this->primaryKey,  $primaryKeys);
+
+        if(count($primaryKeys) > 1){
+            $result = $this->db->get($this->table)->result();
+        }else{
+            $result = $this->db->get($this->table)->row();   
+        }
+        
 
         if ($result) {
             return $result;
