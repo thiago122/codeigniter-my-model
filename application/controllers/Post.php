@@ -7,70 +7,96 @@ class Post extends CI_Controller {
 
 		parent::__construct();
 
-		$this->load->model('ModelPost');
+		$this->load->model(['ModelPost','ModelAuthor','ModelCategory']);
+		$this->load->helpers(['form','url']);
+		$this->load->library(['form_validation']);
 
 	}
 
 	public function index()
 	{
-		// LIST ALL
-		$posts = $this->ModelPost->joinMany('author')->all();
+		$dados['posts'] 	 = $this->ModelPost->join('author')->all();
+		$dados['categories'] = $this->ModelPost->belongsToMany('categories', 2);
 
-		foreach ($posts as $post) {
-			echo ' <br> ' . $post->id_post . ' - ' . $post->title . ' - ' . $post->nm_author;
-		}
-
-		// $this->ModelPost->attach('categories', 2, [1,2,3]);
-		 
-		echo '<hr>';
-
-		$categories = $this->ModelPost->getMany('categories', 2);
-		
-		foreach ($categories as $category) {
-			echo ' <br> ' . $category->id_category . ' - ' . $category->nm_category;
-		}
-		
-	}
-
-	public function saveCategory(){
+		$this->load->view('post/index', $dados);
 
 	}
 
+	public function create($idPost = null)
+	{
+		
+		$dados['authors'] = $this->ModelAuthor->all();
+		$dados['categories'] = $this->ModelCategory->all();
 
-	public function store(){
+		$this->load->view('post/create', $dados);
+	} 
 
-		$insert = [
-			'title' => 'Post - 4',
-			'content' => 'Content',
-			'author_id' => 3
+	public function edit($idPost = null)
+	{
+		
+		$post 	 		 = $this->ModelPost->join('author')->find($idPost); 
+		$authors 		 = $this->ModelAuthor->all();
+		$categories 	 = $this->ModelPost->belongsToMany('categories', $post->id_post, true);
+
+		$dados['post'] 	 = $post; 
+		$dados['authors'] = $authors;
+		$dados['categories'] = $categories;
+		
+		$this->load->view('post/edit', $dados);
+	}
+
+	public function show($idPost = null)
+	{
+
+		$post 	= $this->ModelPost->find($idPost); 
+		$author = $this->ModelPost->hasOne('author', $post->author_id);
+
+		$dados['post'] 	 = $post; 
+		$dados['author'] = $author;
+
+		$this->load->view('post/show', $dados);
+	}
+
+	public function store()
+	{
+
+		$update = [
+			'title' 	=> $this->input->post('title', true),
+			'content' 	=> $this->input->post('content', true),
+			'author_id' => $this->input->post('author_id', true),
 		];
 
-		$this->ModelPost->save($insert);
+		$idPost = $this->ModelPost->save($insert);
+		$this->ModelPost->attach('categories', $idPost, $_POST['category']);
+
+		redirect('Post');
 	}
 
-	public function update($idPost){
+	public function update($idPost)
+	{
 		
 		$update = [
-			'title' => 'Post - 4',
-			'content' => 'Content',
-			'author_id' => 3
+			'title' 	=> $this->input->post('title', true),
+			'content' 	=> $this->input->post('content', true),
+			'author_id' => $this->input->post('author_id', true),
 		];
 
 		$this->ModelPost->save($update, $idPost);
+
+		$categoriesToSave = $this->input->post('category');
+
+		if($categoriesToSave){
+			$this->ModelPost->attach('categories', $idPost, $categories);
+		} 
+		
+		redirect('Post');
 	}
 
-	public function show($idPost = 2){
-
-		// Junta o author no mesmo resultado
-		$post = $this->ModelPost->joinMany('author')->find($idPost);
-		echo ' <br> ' . $post->id_post . ' - ' . $post->title . ' - ' . $post->nm_author;
-
-		// ou pega separadamente
-		$post = $this->ModelPost->find($idPost); 
-		$author = $this->ModelPost->hasOne('author', $idPost);
-
-		echo ' <br><br><br> ' . $post->id_post . ' - ' . $post->title;
-		echo ' <br> ' . $author->id_author . ' - ' . $author->nm_author;
-
+	public function delete($idPost)
+	{
+		
+		$this->ModelPost->delete( $idPost );
+		
+		redirect('Post');
 	}
 }
