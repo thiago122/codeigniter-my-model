@@ -86,7 +86,7 @@ class Post extends CI_Controller {
 		$categoriesToSave = $this->input->post('category');
 
 		if($categoriesToSave){
-			$this->ModelPost->attach('categories', $idPost, $categories);
+			$this->ModelPost->attach('categories', $idPost, $categoriesToSave);
 		} 
 		
 		redirect('Post');
