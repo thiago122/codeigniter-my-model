@@ -16,7 +16,6 @@ class Post extends CI_Controller {
 	public function index()
 	{
 		$dados['posts'] 	 = $this->ModelPost->join('author')->all();
-		$dados['categories'] = $this->ModelPost->belongsToMany('categories', 2);
 
 		$this->load->view('post/index', $dados);
 
@@ -34,7 +33,7 @@ class Post extends CI_Controller {
 	public function edit($idPost = null)
 	{
 		
-		$post 	 		 = $this->ModelPost->join('author')->find($idPost); 
+		$post 	 		 = $this->ModelPost->find($idPost); 
 		$authors 		 = $this->ModelAuthor->all();
 		$categories 	 = $this->ModelPost->belongsToMany('categories', $post->id_post, true);
 
