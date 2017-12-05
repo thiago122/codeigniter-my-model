@@ -101,19 +101,19 @@ class ModelPost extends MY_model {
 		// Um post pertence a um autor
 		//                apelido         model        fk
 		$this->belongs_to['author'] = ['ModelAuthor','author_id'];
-		
+
 		// ONDE
-		// apelido: nome dados ao model que se relaciona com o post 
-		// model:   classe model com as configurações do autor( mais abaixo ) 
-		// fk:      nome da chave que o post recebe para indicar o id do autor que publicou o post 
+		// apelido: nome dados ao model que se relaciona com o post
+		// model:   classe model com as configurações do autor( mais abaixo )
+		// fk:      nome da chave que o post recebe para indicar o id do autor que publicou o post
 
 		// -------------------------------------------------------------------------------------------------
 		// um post pertence a muitas categorias
 		//                      apelido            model           tabela pivot       fk principal	 fk secundaria
 		$this->belongs_to_many['categories'] = ['ModelCategory', 'posts_categories', 'post_id',     'category_id'];
 
-		// apelido: 		nome dados ao model que se relaciona com o post 
-		// model:   		classe model com as configurações do autor( mais abaixo ) 
+		// apelido: 		nome dados ao model que se relaciona com o post
+		// model:   		classe model com as configurações do autor( mais abaixo )
 		// tabela pivot:    tabela que comporta o relacionamento e recebe as chaves
 		// fk principal:    chave que se refere ao model atual no caso o post_id
 		// fk secundária    chave que se refere ao model model referenciado no caso category_id
@@ -140,9 +140,9 @@ Model Author
 		$this->has_many['posts'] = ['ModelPost','author_id'];
 
 		// ONDE
-		// apelido: nome dados ao model que se relaciona com o post 
-		// model:   classe model com as configurações do post 
-		// fk:      nome da chave que o post recebe para indicar o id do autor que publicou o post 
+		// apelido: nome dados ao model que se relaciona com o post
+		// model:   classe model com as configurações do post
+		// fk:      nome da chave que o post recebe para indicar o id do autor que publicou o post
 
 	}
 
@@ -169,13 +169,18 @@ Model Category básico
 
 Model Category básico
 ```php
-	
+
 	// listar os post e relizar o join para trazer os autores
 	$this->ModelPost->join('author')->all();
 
 	// Pegar o author do post
-	$post 	= $this->ModelPost->find($idPost); 
-	$author = $this->ModelPost->hasOne('author', $post->author_id);
+	$post 	= $this->ModelPost->find($idPost);
+
+	$author = $this->ModelPost->belongsTo('author', $post);
+	OU
+	$author = $this->ModelPost->belongsTo('author', $post->author_id);
+
+
 
 	// ou
 	$post 	= $this->ModelPost->join('author')->find($idPost);
@@ -194,14 +199,14 @@ Model Category básico
 
 ```
 
-Lembrando que no model podem ser criados métodos normalmente e se você usar o $this como retorno 
+Lembrando que no model podem ser criados métodos normalmente e se você usar o $this como retorno
 poderá encadear com os métodos normalmente.
 
 
 Um controller usando os métodos
 
 ```php
-	
+
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
@@ -227,34 +232,34 @@ class Post extends CI_Controller {
 
 	public function create($idPost = null)
 	{
-		
+
 		$dados['authors'] = $this->ModelAuthor->all();
 		$dados['categories'] = $this->ModelCategory->all();
 
 		$this->load->view('post/create', $dados);
-	} 
+	}
 
 	public function edit($idPost = null)
 	{
-		
-		$post 	 		 = $this->ModelPost->find($idPost); 
+
+		$post 	 		 = $this->ModelPost->find($idPost);
 		$authors 		 = $this->ModelAuthor->all();
 		$categories 	 = $this->ModelPost->belongsToMany('categories', $post->id_post, true);
 
-		$dados['post'] 	 = $post; 
+		$dados['post'] 	 = $post;
 		$dados['authors'] = $authors;
 		$dados['categories'] = $categories;
-		
+
 		$this->load->view('post/edit', $dados);
 	}
 
 	public function show($idPost = null)
 	{
 
-		$post 	= $this->ModelPost->find($idPost); 
+		$post 	= $this->ModelPost->find($idPost);
 		$author = $this->ModelPost->hasOne('author', $post->author_id);
 
-		$dados['post'] 	 = $post; 
+		$dados['post'] 	 = $post;
 		$dados['author'] = $author;
 
 		$this->load->view('post/show', $dados);
@@ -277,7 +282,7 @@ class Post extends CI_Controller {
 
 	public function update($idPost)
 	{
-		
+
 		$update = [
 			'title' 	=> $this->input->post('title', true),
 			'content' 	=> $this->input->post('content', true),
@@ -290,16 +295,16 @@ class Post extends CI_Controller {
 
 		if($categoriesToSave){
 			$this->ModelPost->attach('categories', $idPost, $categoriesToSave);
-		} 
-		
+		}
+
 		redirect('Post');
 	}
 
 	public function delete($idPost)
 	{
-		
+
 		$this->ModelPost->delete( $idPost );
-		
+
 		redirect('Post');
 	}
 }
