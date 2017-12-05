@@ -15,42 +15,42 @@ class Post extends CI_Controller {
 
 	public function index()
 	{
-		$dados['posts'] 	 = $this->ModelPost->join('author')->all();
-
+		$dados['posts'] = $this->ModelPost->join('author')->all();
 		$this->load->view('post/index', $dados);
-
 	}
 
 	public function create($idPost = null)
 	{
-		
+
 		$dados['authors'] = $this->ModelAuthor->all();
 		$dados['categories'] = $this->ModelCategory->all();
 
 		$this->load->view('post/create', $dados);
-	} 
+	}
 
 	public function edit($idPost = null)
 	{
-		
-		$post 	 		 = $this->ModelPost->find($idPost); 
+
+		$post 	 		 = $this->ModelPost->find($idPost);
 		$authors 		 = $this->ModelAuthor->all();
 		$categories 	 = $this->ModelPost->belongsToMany('categories', $post->id_post, true);
 
-		$dados['post'] 	 = $post; 
+		$dados['post'] 	 = $post;
 		$dados['authors'] = $authors;
 		$dados['categories'] = $categories;
-		
+
 		$this->load->view('post/edit', $dados);
 	}
 
 	public function show($idPost = null)
 	{
 
-		$post 	= $this->ModelPost->find($idPost); 
-		$author = $this->ModelPost->hasOne('author', $post->author_id);
+		$post 	= $this->ModelPost->find($idPost);
+		$author = $this->ModelPost->belongsTo('author', $post->author_id);
+		// OU
+		// $author = $this->ModelPost->belongsTo('author', $post);
 
-		$dados['post'] 	 = $post; 
+		$dados['post'] 	 = $post;
 		$dados['author'] = $author;
 
 		$this->load->view('post/show', $dados);
@@ -59,7 +59,7 @@ class Post extends CI_Controller {
 	public function store()
 	{
 
-		$update = [
+		$insert = [
 			'title' 	=> $this->input->post('title', true),
 			'content' 	=> $this->input->post('content', true),
 			'author_id' => $this->input->post('author_id', true),
@@ -73,7 +73,7 @@ class Post extends CI_Controller {
 
 	public function update($idPost)
 	{
-		
+
 		$update = [
 			'title' 	=> $this->input->post('title', true),
 			'content' 	=> $this->input->post('content', true),
@@ -86,16 +86,16 @@ class Post extends CI_Controller {
 
 		if($categoriesToSave){
 			$this->ModelPost->attach('categories', $idPost, $categoriesToSave);
-		} 
-		
+		}
+
 		redirect('Post');
 	}
 
 	public function delete($idPost)
 	{
-		
+
 		$this->ModelPost->delete( $idPost );
-		
+
 		redirect('Post');
 	}
 }

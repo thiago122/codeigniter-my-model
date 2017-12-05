@@ -8,7 +8,8 @@ class ModelAuthor extends MY_model {
 		$this->table 	  = 'authors';
 		$this->primaryKey = 'id_author';
 
-		$this->has_many['posts'] = ['ModelPost','author_id'];
+        $this->has_many['posts'] = ['ModelPost','author_id'];
+        $this->has_one['profile'] = ['ModelProfile','author_id'];
 
 	}
 

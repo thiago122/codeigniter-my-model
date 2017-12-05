@@ -25,7 +25,7 @@ class MY_Model extends CI_Model
 
     /**
      * Retorna todos os registros da tabela
-     * 
+     *
      * @return object resultado da busca
      */
     public function all()
@@ -57,7 +57,7 @@ class MY_Model extends CI_Model
 
     /**
      * Procura registros na tabela com base na chave primária
-     * 
+     *
      * @param  mixed String ou array
      * @return object resultado da busca
      */
@@ -75,9 +75,9 @@ class MY_Model extends CI_Model
         if(count($primaryKeys) > 1){
             $result = $this->db->get($this->table)->result();
         }else{
-            $result = $this->db->get($this->table)->row();   
+            $result = $this->db->get($this->table)->row();
         }
-        
+
         if ($result) {
             return $result;
         }
@@ -133,7 +133,7 @@ class MY_Model extends CI_Model
     /**
      * String com os campos que deseja retornar
      * @param  string campos da tabela
-     * 
+     *
      * @return o próprio objeto
      */
     public function fields($fields)
@@ -171,7 +171,7 @@ class MY_Model extends CI_Model
      * Salva um registro
      * Se não houver o segundo parâmetro($primaryKey) realiza um insert
      * Se houver o segundo parâmetro($primaryKey) realiza um update
-     * 
+     *
      * @param  array         chave => valor representando o campo do banco e o valor a ser inserido
      * @param  string|array  chave que identifica um registo na tabela
      * @return boolean
@@ -226,11 +226,11 @@ class MY_Model extends CI_Model
      * @param  string|int   id do registro ao qual a relação se refere( Um post possui um autor - então será o id do post )
      * @return boolean      registro da tabela
      */
-    public function hasOne($relationName,$pkValue){
+    public function belongsTo($relationName, $pkValue){
         $relation = $this->belongs_to[$relationName];
 
         $model = $relation[0];
-        
+
         $modelName = explode('/', $model);
         $modelName = end($modelName);
         $this->load->model($model);
@@ -241,21 +241,50 @@ class MY_Model extends CI_Model
         $relationTable = $tableName ;
         $relationKey = $fk;
 
-        $this->db->where($fk,$pkValue);
-        return $this->db->get($tableName)->row();
+        if( is_object($pkValue) ){
+            $this->db->where($fk,$pkValue->{$relation[1]});
+        }else{
+            $this->db->where($fk,$pkValue);
+        }
 
+        return $this->db->get($tableName)->row();
     }
+
+    public function hasOne($relationName, $pkValue){
+
+        $relation = $this->has_one[$relationName];
+
+        $model = $relation[0];
+
+        $modelName = explode('/', $model);
+        $modelName = end($modelName);
+        $this->load->model($model);
+
+        $tableName = $this->{$modelName}->table;
+        $fk = $this->{$modelName}->primaryKey;
+
+        $relationTable = $tableName ;
+
+        if( is_object($pkValue) ){
+            $this->db->where($relation[1],$pkValue->{$this->primaryKey});
+        }else{
+            $this->db->where($relation[1], $pkValue);
+        }
+
+        return $this->db->get($tableName)->row();
+    }
+
 
     /**
      * Invoca vários joins tendo como base os nomes(separados pelo caractere | ) das relações criadas no nodel
-     * Então se hoverem muitas relações que podem ser usadas como joins 
+     * Então se hoverem muitas relações que podem ser usadas como joins
      * não será será necessário realizar várias chamadas em vários join assim:
-     * 
+     *
      * join('nome_da_relacao')->join('nome_da_relacao')->join('nome_da_relacao')
      *
      * Usa-se assim:
      * joinMany('nome_da_relacao|nome_da_relacao|nome_da_relacao')
-     * 
+     *
      * @param  string  nome da relação configurada no model
      * @return o próprio objeto
      */
@@ -276,7 +305,7 @@ class MY_Model extends CI_Model
      * Gera o join tendo como base uma relação um-para-um
      * join('nome_da_relacao')
      * join('nome_da_relacao', 'LEFT')
-     * 
+     *
      * @param   string  nome da relação configurada no model
      * @param   string  tipo do join LEFT, RIGHT, OUTER, INNER...
      * @return  o próprio objeto
@@ -286,7 +315,7 @@ class MY_Model extends CI_Model
         $relation = $this->belongs_to[$relationName];
 
         $model = $relation[0];
-        
+
         $modelName = explode('/', $model);
         $modelName = end($modelName);
         $this->load->model($model);
@@ -319,7 +348,7 @@ class MY_Model extends CI_Model
         $relation = $this->has_many[$relationName];
 
         $model = $relation[0];
-        
+
         $modelName = explode('/', $model);
         $modelName = end($modelName);
         $this->load->model($model);
@@ -341,9 +370,9 @@ class MY_Model extends CI_Model
      * @param  string       nome da relação
      * @param  string|int   id do registro ao qual a relação se refere( Um post possui muitas categorias - então será o id do post )
      * @return boolean      registro da tabela
-     * @return boolean      traz todos os registros da tabela e marca os registros que o 
+     * @return boolean      traz todos os registros da tabela e marca os registros que o
      *                      relacionamento possui( Um post possui muitas categorias - então retornará todas as categorias e marcará as que o post possui )
-     *                      
+     *
      */
     public function belongsToMany($relationName, $primaryKey, $returnAllAndCompareIfExist = false)
     {
@@ -373,10 +402,10 @@ class MY_Model extends CI_Model
         if(!$returnAllAndCompareIfExist){
             return $manyToManyResult;
         }
-        
+
         $fullMany = $this->{$modelName}->all();
         return $this->prepareToCheck($manyToManyResult, $fullMany,  $idLeft);
-  
+
     }
 
     public function attach($relationName, $idLocalValue, $pivotLeftFkValue, $deleteNotFounded = true)
@@ -504,7 +533,7 @@ class MY_Model extends CI_Model
 
     public function ArraySingleField($array, $fieldKey)
     {
-        
+
         if( !$array ){
             return [];
         }

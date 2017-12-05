@@ -6,7 +6,7 @@
 </head>
 <body>
 
-<?php echo form_open(base_url('post/update/')) ?>	
+<?php echo form_open(base_url('post/store/')) ?>
 	<label>Título</label><br>
 	<input type="text" name="title" value="">
 
@@ -16,13 +16,13 @@
 
 	<br><br>
 	<label>Categorias</label><br>
-	
+
 		<?php foreach($categories as $category): ?>
 			<br>
 			<input type="checkbox" name="category[]" value="<?php echo $category->id_category ?>">
 			<?php echo $category->nm_category ?>
 		<?php endforeach ?>
-	
+
 	<br><br>
 
 	<label>Autor</label><br>
@@ -35,7 +35,7 @@
 	<br><br>
 
 	<input type="submit" value="salvar">
-<?php echo form_close();?>	
+<?php echo form_close();?>
 
 </body>
 </html>
