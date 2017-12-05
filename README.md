@@ -4,7 +4,7 @@ Simples MY Model para o codeigniter, desenvolvido para evitar a repetição de c
 
 Para ajudar a explicar vou usar um blog como exemplo:
 
-O básico
+##O básico
 
 Model Post básico com a configuração mínima
 ```php
@@ -53,7 +53,6 @@ $this->ModelPost->where('author','1')->count();
 $this->ModelPost->limit($limit, $offset)->all();
 
 // Salvar - Retorna o id
-
 $insert = [
 	'title' => 'Meu título'
 	'content' => 'Meu conteúdo',
@@ -79,7 +78,7 @@ $this->ModelPost->delete($idPost);
 
 ```
 
-
+##Relancionamentos
 
 
 
