@@ -99,21 +99,57 @@ class ModelPost extends MY_model {
 		//                apelido         model        fk
 		$this->belongs_to['author'] = ['ModelAuthor','author_id'];
 		
-		// onde
+		// ONDE
 		// apelido: nome dados ao model que se relaciona com o post 
 		// model:   classe model com as configurações do autor( mais abaixo ) 
 		// fk:      nome da chave que o post recebe para indicar o id do autor que publicou o post 
 
 		// -------------------------------------------------------------------------------------------------
+		// um post pertence a muitas categorias
+		//                      apelido            model           tabela pivot       fk principal	 fk secundaria
+		$this->belongs_to_many['categories'] = ['ModelCategory', 'posts_categories', 'post_id',     'category_id'];
 
-		$this->belongs_to_many['categories'] = ['ModelCategory', 'posts_categories', 'post_id', 'category_id'];
+		// apelido: 		nome dados ao model que se relaciona com o post 
+		// model:   		classe model com as configurações do autor( mais abaixo ) 
+		// tabela pivot:    tabela que comporta o relacionamento e recebe as chaves
+		// fk principal:    chave que se refere ao model atual no caso o post_id
+		// fk secundária    chave que se refere ao model model referenciado no caso category_id
+
 	}
 
 
 }// end class
 
+```
+
+Model Author
+```php
+
+	public function __construct()
+	{
+		parent::__construct();
+		$this->table 	  = 'authors';
+		$this->primaryKey = 'id_author';
+
+		$this->has_many['posts'] = ['ModelPost','author_id'];
+
+	}
+
+	}// end class
 
 ```
 
+Model Category
+```php
+	class ModelCategory extends MY_model {
 
+		public function __construct()
+		{
+			parent::__construct();
+			$this->table 	  = 'categories';
+			$this->primaryKey = 'id_category';
+		}
 
+	}// end class
+
+```
