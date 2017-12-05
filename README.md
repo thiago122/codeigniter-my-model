@@ -4,7 +4,7 @@ Simples MY Model para o codeigniter, desenvolvido para evitar a repetição de c
 
 Para ajudar a explicar vou usar um blog como exemplo:
 
-##O básico
+### O básico
 
 Model Post básico com a configuração mínima
 ```php
@@ -78,9 +78,42 @@ $this->ModelPost->delete($idPost);
 
 ```
 
-##Relancionamentos
+### Relancionamentos
 
 
+
+Model Post
+```php
+
+class ModelPost extends MY_model {
+
+	public function __construct()
+	{
+		parent::__construct();
+		$this->table 		= 'posts';
+		$this->primaryKey 	= 'id_post';
+
+		// -------------------------------------------------------------------------------------------------
+
+		// Um post pertence a um autor
+		//                apelido         model        fk
+		$this->belongs_to['author'] = ['ModelAuthor','author_id'];
+		
+		// onde
+		// apelido: nome dados ao model que se relaciona com o post 
+		// model:   classe model com as configurações do autor( mais abaixo ) 
+		// fk:      nome da chave que o post recebe para indicar o id do autor que publicou o post 
+
+		// -------------------------------------------------------------------------------------------------
+
+		$this->belongs_to_many['categories'] = ['ModelCategory', 'posts_categories', 'post_id', 'category_id'];
+	}
+
+
+}// end class
+
+
+```
 
 
 
