@@ -62,6 +62,19 @@ $insert = [
 
 $this->ModelPost->save($insert);
 
+// Atualizar
+$update = [
+	'title' => 'Meu título'
+	'content' => 'Meu conteúdo',
+	'author_id'=> 1
+];
+
+$idPost = 1;
+$this->ModelPost->save($update, $idPost);
+
+// Excluir
+$idPost = 1;
+$this->ModelPost->delete($idPost);
 
 
 ```
