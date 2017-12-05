@@ -91,6 +91,11 @@ class MY_Model extends CI_Model
         }
     }
 
+    public function first()
+    {
+        return $this->db->get($this->table)->row();
+    }
+
     /**
      * Acrescenta ao query builder a cláusula where
      * @param  string campo do tabela
