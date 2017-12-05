@@ -131,7 +131,15 @@ Model Author
 		$this->table 	  = 'authors';
 		$this->primaryKey = 'id_author';
 
+		// -------------------------------------------------------------------------------------------------
+		// Um autor possui vários posts
+		//               apelido         model      fk
 		$this->has_many['posts'] = ['ModelPost','author_id'];
+
+		// ONDE
+		// apelido: nome dados ao model que se relaciona com o post 
+		// model:   classe model com as configurações do post 
+		// fk:      nome da chave que o post recebe para indicar o id do autor que publicou o post 
 
 	}
 
@@ -139,7 +147,7 @@ Model Author
 
 ```
 
-Model Category
+Model Category básico
 ```php
 	class ModelCategory extends MY_model {
 
