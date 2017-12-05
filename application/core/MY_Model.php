@@ -312,7 +312,14 @@ class MY_Model extends CI_Model
      */
     public function join($relationName, $escape = null)
     {
-        $relation = $this->belongs_to[$relationName];
+
+        if( isset($this->belongs_to[$relationName]) ){
+            $relation = $this->belongs_to[$relationName];
+        }else if(isset($this->has_one[$relationName])){
+            $relation = $this->has_one[$relationName];
+        }else{
+            die('Relation ' . $relationName . ' Not defined. ');
+        }
 
         $model = $relation[0];
 
@@ -516,7 +523,8 @@ class MY_Model extends CI_Model
     /* FACILITADORES */
     /* ------------------------------------------------------ */
 
-    public function prepareToCheck($arrayParcial, $fullArray, $fieldKey){
+    public function prepareToCheck($arrayParcial, $fullArray, $fieldKey)
+    {
 
         $exitents = $this->ArraySingleField($arrayParcial, $fieldKey);
 
@@ -560,6 +568,8 @@ class MY_Model extends CI_Model
 
         if (in_array($order_by, $this->order_col_fields) && in_array($order, $orderPossibilities)) {
             $this->db->order_by($order_by, $order);
+        }else if( !empty($this->order_col_default) ){
+            $this->db->order_by($this->order_col_default[0], $this->order_col_default[1]);
         }
 
         return $this;
