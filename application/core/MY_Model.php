@@ -91,10 +91,12 @@ class MY_Model extends CI_Model
         }
     }
 
+
     public function first()
     {
         return $this->db->get($this->table)->row();
     }
+
 
     /**
      * Acrescenta ao query builder a cláusula where
@@ -571,8 +573,18 @@ class MY_Model extends CI_Model
 
         $order = $this->input->get($this->order_col_param, true);
 
-        if (in_array($order_by, $this->order_col_fields) && in_array($order, $orderPossibilities)) {
-            $this->db->order_by($order_by, $order);
+        $field = null;
+
+        foreach($this->order_col_fields as $key => $order_col){
+
+            if($order_col == $order_by){
+                $field = $key;
+            }
+
+        }
+
+        if ($field && in_array($order, $orderPossibilities)) {
+            $this->db->order_by($field, $order);
         }else if( !empty($this->order_col_default) ){
             $this->db->order_by($this->order_col_default[0], $this->order_col_default[1]);
         }
