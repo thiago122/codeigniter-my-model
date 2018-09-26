@@ -111,6 +111,12 @@ class MY_Model extends CI_Model
         return $this;
     }
 
+    public function notIn($field, $value)
+    {
+        $this->db->where_not_in($field, $value);
+        return $this;
+    }
+
     /**
      * Acrescenta ao query builder a cláusula like
      * @param  string campo do tabela
@@ -321,12 +327,18 @@ class MY_Model extends CI_Model
     {
 
         if( isset($this->belongs_to[$relationName]) ){
-            $relation = $this->belongs_to[$relationName];
+            $this->joinBelongsTo($relationName, $escape);
         }else if(isset($this->has_one[$relationName])){
-            $relation = $this->has_one[$relationName];
+            $this->joinHasOne($relationName, $escape );
         }else{
             die('Relation ' . $relationName . ' Not defined. ');
         }
+        return $this;
+    }
+
+    public function joinBelongsTo($relationName, $escape = null){
+
+        $relation = $this->belongs_to[$relationName];
 
         $model = $relation[0];
 
@@ -351,6 +363,33 @@ class MY_Model extends CI_Model
 
         return $this;
     }
+
+    public function joinHasOne($relationName, $escape = null){
+
+        $relation = $this->has_one[$relationName];
+
+        $model = $relation[0];
+
+        $modelName = explode('/', $model);
+        $modelName = end($modelName);
+        $this->load->model($model);
+
+        $tableName = $this->{$modelName}->table;
+        $relationTable = $tableName ;
+
+        $localKey = $relation[1];
+
+        if ($escape) {
+            $this->db->join($relationTable, $relationTable.'.'.$localKey.' = '.$this->table.'.'.$this->primaryKey, $escape);
+
+            return $this;
+        }
+
+        $this->db->join($relationTable, $relationTable.'.'.$localKey.' = '.$this->table.'.'.$this->primaryKey);
+
+        return $this;
+    }
+
 
     /**
      * Retorna o regitro relacionado a relação um-para-muitos reclarada no model
@@ -388,7 +427,7 @@ class MY_Model extends CI_Model
      *                      relacionamento possui( Um post possui muitas categorias - então retornará todas as categorias e marcará as que o post possui )
      *
      */
-    public function belongsToMany($relationName, $primaryKey, $returnAllAndCompareIfExist = false)
+    public function belongsToMany($relationName, $primaryKey, $returnAllAndCompareIfExist = false, $order = [])
     {
         $relationsData = $this->belongs_to_many[$relationName];
 
@@ -411,10 +450,22 @@ class MY_Model extends CI_Model
         $this->db->where($pivot.'.'.$fk, $primaryKey);
         $this->db->join($pivot, $pivot.'.'.$pivotLeftFk.' = '.$tableLeft.'.'.$idLeft);
 
+        if( !empty($order) ){
+            foreach ($order as $ord) {
+                $this->db->order_by($ord[0], $ord[1]);
+            }
+        }
+
         $manyToManyResult = $this->db->get($tableLeft)->result();
 
         if(!$returnAllAndCompareIfExist){
             return $manyToManyResult;
+        }
+
+        if( !empty($order) ){
+            foreach ($order as $ord) {
+                $this->db->order_by($ord[0], $ord[1]);
+            }
         }
 
         $fullMany = $this->{$modelName}->all();
@@ -424,6 +475,7 @@ class MY_Model extends CI_Model
 
     public function attach($relationName, $idLocalValue, $pivotLeftFkValue, $deleteNotFounded = true)
     {
+
         if (!is_array($pivotLeftFkValue)) {
             $temp = $pivotLeftFkValue;
             $pivotLeftFkValue = [];
@@ -452,10 +504,12 @@ class MY_Model extends CI_Model
             $existing[] = $r->{$pivotLeftFk};
         }
 
+
         foreach ($pivotLeftFkValue as $key => $val) {
 
             // se o valor for um array
             if (is_array($val)) {
+
                 if (!in_array($key, $existing)) {
                     $insert = [
                         $pivotLeftFk => $key,
@@ -483,19 +537,38 @@ class MY_Model extends CI_Model
                     $this->db->update($pivot, $insert);
                     $updated[] = $key;
                 }
+
             } else {
+
                 if (!in_array($val, $existing)) {
+
+                    if( !empty($val) ){
+                        $insert = [
+                            $pivotLeftFk => $val,
+                            $fk => $idLocalValue,
+                        ];
+
+                        $this->db->insert($pivot, $insert);
+                        $inserted[] = $val;
+                    }
+
+
+                } else {
+
                     $insert = [
                         $pivotLeftFk => $val,
                         $fk => $idLocalValue,
                     ];
 
-                    $this->db->insert($pivot, $insert);
-                    $inserted[] = $val;
-                } else {
+                    $this->db->where($pivotLeftFk, $val);
+                    $this->db->where($fk, $idLocalValue);
+                    $this->db->update($pivot, $insert);
                     $updated[] = $val;
+
                 }
+
             }
+
         }
 
         $toDelete = array_diff($existing, array_merge($updated, $inserted));
@@ -505,6 +578,7 @@ class MY_Model extends CI_Model
                 ->where_in($pivotLeftFk, $toDelete)
                 ->delete($pivot);
         }
+
     }
 
     public function dettach($relationName, $idLocal, $fkValue){
@@ -537,9 +611,9 @@ class MY_Model extends CI_Model
 
         foreach ($fullArray as $item) {
             if( in_array($item->{$fieldKey}, $exitents) ){
-                $item->ckecked = true;
+                $item->checked = true;
             }else{
-                $item->ckecked = false;
+                $item->checked = false;
             }
         }
 
