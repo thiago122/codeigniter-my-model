@@ -25,7 +25,7 @@ class Teste extends CI_Controller {
         $profile = $this->ModelProfile->find([1]);
 
         $autor = $this->ModelProfile->belongsTo('author', $profile);
-        // print_r($this->db->last_query());
+        // print_r($this->db->last_query()); 
 
     }
 
